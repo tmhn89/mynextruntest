@@ -1,10 +1,3 @@
-var MONTH_NAMES = [
-    'January', 'February', 'March',
-    'April', 'May', 'June', 'July',
-    'August', 'September', 'October',
-    'November', 'December'
-];
-
 function RunningEvent (event) {    
     this.name = event.eventName;
     this.time = event.eventDate;
@@ -17,13 +10,12 @@ function RunningEvent (event) {
     this.latlng = new google.maps.LatLng(this.lat, this.lng)
     this.distanceToCenter = 0;
 
-    this.dateStr = function() {
-        var date = this.date;
-        return date.getDate() + ' ' + MONTH_NAMES[date.getMonth()] + ' ' + date.getFullYear();
+    this.dateStr = function() {        
+        return formatDate(this.date);
     };
 
     this.infoText = function() {        
-        return this.name + '<br/>' + this.dateStr() + '<br>' + this.distanceToCenter + ' km away from you';
+        return '<b>' + this.name + '</b><br/>' + this.dateStr() + '<br>' + this.distanceToCenter + ' km away from you';
     };
 
     this.setMarker = function() {

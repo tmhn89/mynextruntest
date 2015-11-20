@@ -2,7 +2,7 @@ var url = 'event-stats.json';
 // var url = 'https://api-test.mynextrun.com/site/v1/event-stats?jsoncallback=?';
 // default location
 var initialLocation = new google.maps.LatLng(60.1675899,24.9214712);
-
+    var markerList = [];
 
 // marker img here
 var markerImg = {
@@ -11,7 +11,7 @@ var markerImg = {
         null, 
         null, 
         null, 
-        new google.maps.Size(16, 16)
+        new google.maps.Size(24, 24)
     ),
     runningEvent: new google.maps.MarkerImage (
         'http://www.healthymen.ca/resources/content_running-man--green.png',
@@ -31,14 +31,14 @@ var markerImg = {
     }
 };
 
-function loadEvent(data) {
-    $('#data').html(data.eventCount);
+function loadEvent(data) {    
     google.maps.event.addDomListener(window, 'load', initMap(data));
 }
 
 function initMap(data) {
+
     var mapProp = {
-        zoom: 10,
+        zoom: 8,
         mapTypeId: google.maps.MapTypeId.ROADMAP
     };
 
@@ -64,17 +64,17 @@ function initMap(data) {
         setCenterMarker(initialLocation, map);
         // load markers
         loadMarkers(data, initialLocation, map);
-    }        
+    }    
 
     google.maps.event.addListener(map, "center_changed", function() { 
         mapCenter = {lat: map.getCenter().lat(), lng: map.getCenter().lng()};        
     });    
 }
 
-function loadMarkers(data, initialLocation, map) {
+function loadMarkers(data, initialLocation, map) {    
     for (var i = 0; i < data.events.length; i++) {
         setEventMarker(data.events[i], map, initialLocation);
-    }
+    }    
 }
 
 function setEventMarker(event, map, initialLocation) {
@@ -92,7 +92,9 @@ function setEventMarker(event, map, initialLocation) {
         icon: r_event.markerIcon(),
         date: r_event.date
 
-    });    
+    });
+
+    markerList.push(eventMarker);    
 
     eventMarker.addListener('click', function() {
         infowindow.open(map, eventMarker);
@@ -104,10 +106,19 @@ function setEventMarker(event, map, initialLocation) {
 function setCenterMarker(pos, map) {
     map.setCenter(pos);
 
-    return new google.maps.Marker({
+    var centerMarker = new google.maps.Marker({
         position: pos,
         map: map,
         icon: markerImg.currentPos,
+    });
+
+    var infowindow = new google.maps.InfoWindow({
+        content: 'You are here: <br>'
+    });
+
+    centerMarker.addListener('click', function() {
+        infowindow.open(map, centerMarker);
+        map.setZoom(12);
     });
 }
 
@@ -119,6 +130,7 @@ function monthDiff(date1, date2) {
     return result;
 }
 
+// load data
 $.ajax({
     url: url,
     dataType: 'json',
@@ -126,3 +138,73 @@ $.ajax({
       loadEvent(data);
     }
 });
+
+$('.datepicker').pickadate({
+    selectMonths: true, // Creates a dropdown to control month
+    selectYears: 15 // Creates a dropdown of 15 years to control year
+});
+
+
+// date slider
+// Create a new date from a string, return as a timestamp.
+function timestamp(str){
+    return new Date(str).getTime();   
+}
+
+var dateSlider = document.getElementById('daterange');
+
+noUiSlider.create(dateSlider, {
+    start: [ timestamp('Nov 2015'), timestamp('2017') ],
+    step: 24 * 60 * 60 * 1000,
+    range: {
+        min: timestamp('Nov 2015'),
+        max: timestamp('2017')
+    },
+});
+
+var dateValues = [
+    document.getElementById('startdate'),
+    document.getElementById('enddate')
+];
+
+dateSlider.noUiSlider.on('update', function( values, handle ) {
+    var dateStart = new Date(parseFloat(values[0]));
+    var dateEnd = new Date(parseFloat(values[1]));
+
+    $('#startdate').val(formatDate(dateStart));    
+    $('#enddate').val(formatDate(dateEnd));
+    setMarkerVisibility(markerList, dateStart, dateEnd);
+});
+
+function setMarkerVisibility(markerList, dateStart, dateEnd) {
+    if (!dateStart) {
+        dateStart = new Date('01-01-1900');
+    }
+    if (!dateEnd) {
+        dateEnd = new Date('01-01-2100');
+    }
+
+    for (var i = 0; i < markerList.length; i++) {
+        //markerslist[i].setMap(map);
+        if (markerList[i].date < dateStart || markerList[i].date > dateEnd ) {
+            markerList[i].setVisible(false);
+        } else {
+            markerList[i].setVisible(true);
+        }
+
+    }
+}
+
+$('#startdate').change(function() {    
+    setDate();
+});
+$('#enddate').change(function() {    
+    setDate();
+});
+
+function setDate() {
+    var dateStart = new Date($('#startdate').val());
+    var dateEnd = new Date($('#enddate').val());    
+    dateSlider.noUiSlider.set([timestamp(dateStart), timestamp(dateEnd)]);
+    setMarkerVisibility(markerList, dateStart, dateEnd);
+}

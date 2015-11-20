@@ -2,14 +2,37 @@
 <html>
 <head>
     <title></title>
+    <link rel="stylesheet" href="http://materializecss.com/css/ghpages-materialize.css" />
+    <link rel="stylesheet" href="http://materializecss.com/extras/noUiSlider/nouislider.css" />
     <link rel="stylesheet" href="custom.css" />
 </head>
 <body>
-    <div id="map"></div>
-    <div id="data">
-        
+    <div class="row tight">
+        <div class="col s8">
+            <div id="map"></div>
+        </div>
+        <div class="col s4 fullheight">
+            <h4>Your next running events</h4>
+            <label for="startdate">From date:</label>
+            <input type="text" value="" id="startdate" class="datepicker"/>
+            <label for="enddate">To date</label>
+            <input type="text" value="" id="enddate" class="datepicker"/>
+
+            <label for="daterange" id="daterangelbl">Show event in date range:</label>
+            <div id="daterange"></div>
+
+            <div class="legend">
+                <label>Events happen next:</label>                
+                <div class="bar"></div>
+                <label class="left">1 month</label>
+                <label class="right">> 10 months</label>
+            </div>
+        </div>
     </div>
+        
     <script type="text/javascript" src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+    <script type="text/javascript" src="http://materializecss.com/bin/materialize.js"></script>
+    <script type="text/javascript" src="http://materializecss.com/extras/noUiSlider/nouislider.js"></script>
     <script src="https://maps.googleapis.com/maps/api/js?libraries=geometry&key=AIzaSyBswNU-rxWKR1B16qxrNIlbCn7kJZQE-68"></script>
     <script type="text/javascript" src="running_event.js"></script>
     <script type="text/javascript" src="helper.js"></script>
